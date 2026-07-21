@@ -268,9 +268,13 @@
   <header class="top">
     <div>
       <p class="brand-eyebrow">Локализация · Контроль качества</p>
-      <h1>LQA-трекер магазина (веб)</h1>
+      <h1>LQA Tracker</h1>
     </div>
     <div class="top-right">
+      <span class="shared-note" title="Данные видны всем, у кого есть ссылка на этот инструмент">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        общий список команды
+      </span>
       <button class="btn ghost small" id="exportBtn">Экспорт CSV</button>
       <button class="btn" id="newBugBtn">+ Новая ошибка</button>
     </div>
@@ -303,6 +307,7 @@
           <th>Приоритет</th>
           <th>Статус</th>
           <th>Комментарий</th>
+          <th>Дата</th>
           <th></th>
         </tr>
       </thead>
@@ -315,6 +320,7 @@
     </div>
   </div>
 
+  <p class="footer-note">Данные хранятся в общем хранилище этого инструмента и видны всем, у кого есть ссылка на него.</p>
 </div>
 
 <!-- Modal -->
@@ -582,6 +588,7 @@ function render(){
       <td><span class="pill pr-${slug(b.priority)}">${b.priority}</span></td>
       <td>${inlineSelect('status', b.id, STATUSES, b.status, true)}</td>
       <td class="comment-cell">${escapeHtml(truncate(b.comment,70))}</td>
+      <td class="loc-cell mono">${formatDate(b.createdAt)}</td>
       <td>
         <div class="row-actions">
           ${b.screenshotUrl ? `<button type="button" class="icon-btn shot-view" title="Посмотреть скриншот">📎</button>` : ''}
@@ -657,6 +664,12 @@ function renderLangBreakdown(){
 }
 
 function truncate(s,n){ if(!s) return '—'; return s.length>n ? s.slice(0,n)+'…' : s; }
+function formatDate(iso){
+  if(!iso) return '—';
+  const d = new Date(iso);
+  if(isNaN(d)) return '—';
+  return d.toLocaleDateString('ru-RU', {day:'2-digit', month:'2-digit', year:'2-digit'});
+}
 function escapeHtml(s){
   if(s===undefined||s===null) return '';
   return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
@@ -847,8 +860,8 @@ $('#deleteBtn').addEventListener('click', async ()=>{
 
 /* ---------------- CSV export ---------------- */
 $('#exportBtn').addEventListener('click', ()=>{
-  const headers = ['Язык','Категория','Подкатегория','Раздел / как найти ошибку','Неправильный перевод','Новый перевод','Кто исправляет','Приоритет','Статус','Комментарий'];
-  const rows = bugs.map(b=>[b.language,b.category,b.subcategory,b.location,b.wrong,b.right,b.assignee,b.priority,b.status,b.comment]);
+  const headers = ['Язык','Категория','Подкатегория','Раздел / как найти ошибку','Неправильный перевод','Новый перевод','Кто исправляет','Приоритет','Статус','Комментарий','Дата'];
+  const rows = bugs.map(b=>[b.language,b.category,b.subcategory,b.location,b.wrong,b.right,b.assignee,b.priority,b.status,b.comment,formatDate(b.createdAt)]);
   const csv = [headers, ...rows].map(r =>
     r.map(v => '"' + String(v||'').replace(/"/g,'""') + '"').join(',')
   ).join('\r\n');
