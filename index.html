@@ -75,7 +75,7 @@
     font-family:'Fraunces',serif; font-weight:600; font-optical-sizing:auto;
     font-size:clamp(28px,4vw,38px); margin:0; letter-spacing:-.01em;
   }
-  .top-right{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+  .top-right{display:flex; align-items:center; gap:30px; flex-wrap:wrap;}
 
   /* ---------- Stats ---------- */
   .stats{
@@ -285,16 +285,10 @@
     <div class="brand-row">
       <div class="wb-badge">WB</div>
       <div>
-        <p class="brand-eyebrow">Локализация · Контроль качества</p>
-        <h1>LQA Tracker</h1>
-      </div>
+      <h1>LQA-трекер магазина (веб)</h1>
     </div>
     <div class="top-right">
-      <span class="shared-note" title="Данные видны всем, у кого есть ссылка на этот инструмент">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        общий список команды
-      </span>
-      <button class="btn ghost small" id="exportBtn">Экспорт CSV</button>
+      <button class="btn ghost small" id="exportBtn"><a href="https://docs.google.com/spreadsheets/d/1owQZFtkqSkg-9TMT6od4kpx5e0bFR1EvmAp-Mjpivu0/edit?gid=783043706#gid=783043706" target="_blank">Google-таблица</a></button>
       <button class="btn" id="newBugBtn">+ Новая ошибка</button>
     </div>
   </header>
@@ -693,7 +687,6 @@ function renderStats(){
     <div class="stat"><div class="num" style="font-size:16px;">${topCat ? escapeHtml(topCat[0]) : '—'}</div><div class="label">Частая категория ${topCat ? '('+topCat[1]+')' : ''}</div></div>
     <div class="stat"><div class="num" style="font-size:16px;">${topAssignee ? escapeHtml(topAssignee[0]) : '—'}</div><div class="label">Больше всего на нём ${topAssignee ? '('+topAssignee[1]+')' : ''}</div></div>
     <div class="stat"><div class="num mono">${newThisWeek}</div><div class="label">Новых за неделю</div></div>
-    <div class="stat ${oldestDays>7?'accent-red':''}"><div class="num mono">${oldestDays!==null ? oldestDays+'д' : '—'}</div><div class="label">Старейший открытый</div></div>
   `;
   renderLangBreakdown();
   renderPriorityBreakdown();
