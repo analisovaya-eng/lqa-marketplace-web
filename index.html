@@ -75,7 +75,7 @@
     font-family:'Fraunces',serif; font-weight:600; font-optical-sizing:auto;
     font-size:clamp(28px,4vw,38px); margin:0; letter-spacing:-.01em;
   }
-  .top-right{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+  .top-right{display:flex; align-items:center; gap:70px; flex-wrap:wrap;}
 
   /* ---------- Stats ---------- */
   .stats{
@@ -334,7 +334,6 @@
     </div>
   </div>
 
-  <p class="footer-note">Данные хранятся в общем хранилище этого инструмента и видны всем, у кого есть ссылка на него.</p>
 </div>
 
 <!-- Modal -->
@@ -673,14 +672,13 @@ function renderStats(){
   const oldestDays = oldestOpen ? Math.floor((Date.now() - new Date(oldestOpen.createdAt).getTime()) / (24*60*60*1000)) : null;
 
   $('#stats').innerHTML = `
-    <div class="stat"><div class="num mono">${total}</div><div class="label">Всего находок</div></div>
+    <div class="stat"><div class="num mono">${total}</div><div class="label">Всего багов</div></div>
     <div class="stat accent-red"><div class="num mono">${blockers}</div><div class="label">Открытых блокеров</div></div>
     <div class="stat"><div class="num mono">${inProgress}</div><div class="label">В работе сейчас</div></div>
     <div class="stat accent-green"><div class="num mono">${pct}%</div><div class="label">Исправлено</div></div>
     <div class="stat"><div class="num" style="font-size:16px;">${topCat ? escapeHtml(topCat[0]) : '—'}</div><div class="label">Частая категория ${topCat ? '('+topCat[1]+')' : ''}</div></div>
-    <div class="stat"><div class="num" style="font-size:16px;">${topAssignee ? escapeHtml(topAssignee[0]) : '—'}</div><div class="label">Больше всего на нём ${topAssignee ? '('+topAssignee[1]+')' : ''}</div></div>
-    <div class="stat"><div class="num mono">${newThisWeek}</div><div class="label">Новых за неделю</div></div>
-    <div class="stat ${oldestDays>7?'accent-red':''}"><div class="num mono">${oldestDays!==null ? oldestDays+'д' : '—'}</div><div class="label">Старейший открытый</div></div>
+    <div class="stat"><div class="num" style="font-size:16px;">${topAssignee ? escapeHtml(topAssignee[0]) : '—'}</div><div class="label">На них больше всего багов ${topAssignee ? '('+topAssignee[1]+')' : ''}</div></div>
+    <div class="stat"><div class="num mono">${newThisWeek}</div><div class="label">Новых багов за неделю</div></div>
   `;
   renderLangBreakdown();
   renderPriorityBreakdown();
