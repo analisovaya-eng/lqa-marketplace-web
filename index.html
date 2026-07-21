@@ -58,6 +58,14 @@
     padding-bottom:22px; margin-bottom:22px;
     border-bottom:1px solid var(--line);
   }
+  .brand-row{display:flex; align-items:center; gap:14px;}
+  .wb-badge{
+    width:46px; height:46px; border-radius:13px; flex-shrink:0;
+    background:linear-gradient(155deg, var(--wb-purple) 0%, var(--wb-purple-deep) 100%);
+    color:#fff; font-family:'Fraunces',serif; font-weight:700; font-size:17px; letter-spacing:.01em;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 6px 16px rgba(108,11,169,.28);
+  }
   .brand-eyebrow{
     font-family:'JetBrains Mono',monospace;
     font-size:11px; letter-spacing:.14em; text-transform:uppercase;
@@ -269,15 +277,13 @@
 
 <div class="wrap">
   <header class="top">
-    <div>
-      <p class="brand-eyebrow">Локализация · Контроль качества</p>
-      <h1>LQA Tracker</h1>
+    <div class="brand-row">
+      <div class="wb-badge">WB</div>
+      <div>
+        <p class="brand-eyebrow">Локализация · Контроль качества</p>
+      <h1>LQA-трекер магазина (веб)</h1>
     </div>
     <div class="top-right">
-      <span class="shared-note" title="Данные видны всем, у кого есть ссылка на этот инструмент">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        общий список команды
-      </span>
       <button class="btn ghost small" id="exportBtn">Экспорт CSV</button>
       <button class="btn" id="newBugBtn">+ Новая ошибка</button>
     </div>
@@ -323,7 +329,6 @@
     </div>
   </div>
 
-  <p class="footer-note">Данные хранятся в общем хранилище этого инструмента и видны всем, у кого есть ссылка на него.</p>
 </div>
 
 <!-- Modal -->
