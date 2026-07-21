@@ -683,7 +683,7 @@ function renderStats(){
     <div class="stat"><div class="num mono">${inProgress}</div><div class="label">В работе сейчас</div></div>
     <div class="stat accent-green"><div class="num mono">${pct}%</div><div class="label">Исправлено</div></div>
     <div class="stat"><div class="num" style="font-size:16px;">${topCat ? escapeHtml(topCat[0]) : '—'}</div><div class="label">Частая категория ${topCat ? '('+topCat[1]+')' : ''}</div></div>
-    <div class="stat"><div class="num" style="font-size:16px;">${topAssignee ? escapeHtml(topAssignee[0]) : '—'}</div><div class="label">Больше всего на нём ${topAssignee ? '('+topAssignee[1]+')' : ''}</div></div>
+    <div class="stat"><div class="num" style="font-size:16px;">${topAssignee ? escapeHtml(topAssignee[0]) : '—'}</div><div class="label">На них больше всего багов ${topAssignee ? '('+topAssignee[1]+')' : ''}</div></div>
     <div class="stat"><div class="num mono">${newThisWeek}</div><div class="label">Новых за неделю</div></div>
   `;
   renderLangBreakdown();
