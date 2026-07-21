@@ -75,7 +75,7 @@
     font-family:'Fraunces',serif; font-weight:600; font-optical-sizing:auto;
     font-size:clamp(28px,4vw,38px); margin:0; letter-spacing:-.01em;
   }
-  .top-right{display:flex; align-items:center; gap:30px; flex-wrap:wrap;}
+  .top-right{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
 
   /* ---------- Stats ---------- */
   .stats{
@@ -285,10 +285,16 @@
     <div class="brand-row">
       <div class="wb-badge">WB</div>
       <div>
-      <h1>LQA-трекер магазина (веб)</h1>
+        <p class="brand-eyebrow">Локализация · Контроль качества</p>
+        <h1>LQA Tracker</h1>
+      </div>
     </div>
     <div class="top-right">
-      <button class="btn ghost small" id="exportBtn"><a href="https://docs.google.com/spreadsheets/d/1owQZFtkqSkg-9TMT6od4kpx5e0bFR1EvmAp-Mjpivu0/edit?gid=783043706#gid=783043706" target="_blank">Google-таблица</a></button>
+      <span class="shared-note" title="Данные видны всем, у кого есть ссылка на этот инструмент">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        общий список команды
+      </span>
+      <button class="btn ghost small" id="exportBtn">Экспорт CSV</button>
       <button class="btn" id="newBugBtn">+ Новая ошибка</button>
     </div>
   </header>
@@ -306,7 +312,11 @@
     <select class="filter" id="fCategory"><option value="">Все категории</option></select>
     <select class="filter" id="fPriority"><option value="">Любой приоритет</option></select>
     <select class="filter" id="fStatus"><option value="">Любой статус</option></select>
-    <select class="filter" id="fAssignee"><option value="">Любой исполнитель</option></select>
+    <select class="filter" id="fAssignee"><option value="">Любой ответственный</option></select>
+    <select class="filter" id="fSort">
+      <option value="new">Сначала новые</option>
+      <option value="old">Сначала старые</option>
+    </select>
   </div>
 
   <div class="table-shell">
@@ -334,6 +344,7 @@
     </div>
   </div>
 
+  <p class="footer-note">Данные хранятся в общем хранилище этого инструмента и видны всем, у кого есть ссылка на него.</p>
 </div>
 
 <!-- Modal -->
@@ -444,7 +455,7 @@ let bugs = [];
 /* ---------------- Backend endpoint ---------------- */
 // Вставьте сюда ссылку на развёрнутый Google Apps Script (заканчивается на /exec).
 // См. инструкцию в файле apps-script-code.gs
-const SHEETS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxMOStrnj-i3zik1-kqKORmAJ4da8B9Ek3OArLS1cVJzXfXRnkmtlMXinvP35UpHm_FLA/exec';
+const SHEETS_ENDPOINT = 'ВСТАВЬТЕ_СЮДА_ССЫЛКУ_НА_APPS_SCRIPT';
 const endpointConfigured = /^https:\/\//.test(SHEETS_ENDPOINT);
 
 function showSetupBanner(){
@@ -533,7 +544,7 @@ function initStaticSelects(){
   $('#fCategory').innerHTML = '<option value="">Все категории</option>' + Object.keys(CATEGORIES).map(c=>`<option value="${c}">${c}</option>`).join('');
   $('#fPriority').innerHTML = '<option value="">Любой приоритет</option>' + PRIORITIES.map(p=>`<option value="${p}">${p}</option>`).join('');
   $('#fStatus').innerHTML = '<option value="">Любой статус</option>' + STATUSES.map(s=>`<option value="${s}">${s}</option>`).join('');
-  $('#fAssignee').innerHTML = '<option value="">Любой исполнитель</option>' + ASSIGNEES.map(a=>`<option value="${a}">${a}</option>`).join('');
+  $('#fAssignee').innerHTML = '<option value="">Любой ответственный</option>' + ASSIGNEES.map(a=>`<option value="${a}">${a}</option>`).join('');
 
   fillSelect($('#fldLanguage'), LANGUAGES, false);
   fillSelect($('#fldCategory'), Object.keys(CATEGORIES), false);
@@ -575,7 +586,10 @@ function render(){
       if(!hay.includes(q)) return false;
     }
     return true;
-  }).sort((a,b)=> b.createdAt.localeCompare(a.createdAt));
+  }).sort((a,b)=> {
+    const ca = a.createdAt||'', cb = b.createdAt||'';
+    return $('#fSort').value === 'old' ? ca.localeCompare(cb) : cb.localeCompare(ca);
+  });
 
   tbody.innerHTML = '';
   $('#emptyState').style.display = filtered.length ? 'none' : 'block';
@@ -672,13 +686,14 @@ function renderStats(){
   const oldestDays = oldestOpen ? Math.floor((Date.now() - new Date(oldestOpen.createdAt).getTime()) / (24*60*60*1000)) : null;
 
   $('#stats').innerHTML = `
-    <div class="stat"><div class="num mono">${total}</div><div class="label">Всего багов</div></div>
+    <div class="stat"><div class="num mono">${total}</div><div class="label">Всего находок</div></div>
     <div class="stat accent-red"><div class="num mono">${blockers}</div><div class="label">Открытых блокеров</div></div>
     <div class="stat"><div class="num mono">${inProgress}</div><div class="label">В работе сейчас</div></div>
     <div class="stat accent-green"><div class="num mono">${pct}%</div><div class="label">Исправлено</div></div>
     <div class="stat"><div class="num" style="font-size:16px;">${topCat ? escapeHtml(topCat[0]) : '—'}</div><div class="label">Частая категория ${topCat ? '('+topCat[1]+')' : ''}</div></div>
-    <div class="stat"><div class="num" style="font-size:16px;">${topAssignee ? escapeHtml(topAssignee[0]) : '—'}</div><div class="label">На них больше всего багов ${topAssignee ? '('+topAssignee[1]+')' : ''}</div></div>
-    <div class="stat"><div class="num mono">${newThisWeek}</div><div class="label">Новых багов за неделю</div></div>
+    <div class="stat"><div class="num" style="font-size:16px;">${topAssignee ? escapeHtml(topAssignee[0]) : '—'}</div><div class="label">Больше всего на нём ${topAssignee ? '('+topAssignee[1]+')' : ''}</div></div>
+    <div class="stat"><div class="num mono">${newThisWeek}</div><div class="label">Новых за неделю</div></div>
+    <div class="stat ${oldestDays>7?'accent-red':''}"><div class="num mono">${oldestDays!==null ? oldestDays+'д' : '—'}</div><div class="label">Старейший открытый</div></div>
   `;
   renderLangBreakdown();
   renderPriorityBreakdown();
@@ -832,7 +847,7 @@ $('#overlay').addEventListener('click', e=>{ if(e.target.id==='overlay') closeMo
 $('#fldCategory').addEventListener('change', updateSubcategoryOptions);
 $('#fldSubcategory').addEventListener('change', updateFieldLabels);
 $('#priorityChoice').addEventListener('change', updatePriorityHint);
-['#searchInput','#fLanguage','#fCategory','#fPriority','#fStatus','#fAssignee'].forEach(sel=>{
+['#searchInput','#fLanguage','#fCategory','#fPriority','#fStatus','#fAssignee','#fSort'].forEach(sel=>{
   $(sel).addEventListener('input', render);
   $(sel).addEventListener('change', render);
 });
