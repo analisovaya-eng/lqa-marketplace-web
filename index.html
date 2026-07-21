@@ -75,7 +75,7 @@
     font-family:'Fraunces',serif; font-weight:600; font-optical-sizing:auto;
     font-size:clamp(28px,4vw,38px); margin:0; letter-spacing:-.01em;
   }
-  .top-right{display:flex; align-items:center; gap:30px; flex-wrap:wrap;}
+  .top-right{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
 
   /* ---------- Stats ---------- */
   .stats{
@@ -161,6 +161,11 @@
   .pr-Высокий{color:var(--red); background:#FBEFED;}
   .pr-Средний{color:var(--amber); background:#F7EFDE;}
   .pr-Низкий{color:var(--slate); background:#F0F0EF;}
+  .pr-Блокер-chip{color:var(--red-deep); background:#F7E7E4; border-color:transparent;}
+  .pr-Высокий-chip{color:var(--red); background:#FBEFED; border-color:transparent;}
+  .pr-Средний-chip{color:var(--amber); background:#F7EFDE; border-color:transparent;}
+  .pr-Низкий-chip{color:var(--slate); background:#F0F0EF; border-color:transparent;}
+  .pr-Блокер-chip b, .pr-Высокий-chip b, .pr-Средний-chip b, .pr-Низкий-chip b{color:inherit;}
 
   .inline-select{
     border:1px solid transparent; border-radius:20px; padding:4px 24px 4px 10px;
@@ -289,6 +294,7 @@
   </header>
 
   <div class="stats" id="stats"></div>
+  <div class="lang-breakdown" id="prioBreakdown"></div>
   <div class="lang-breakdown" id="langBreakdown"></div>
 
   <div class="toolbar">
@@ -323,11 +329,12 @@
     </table>
     <div class="empty" id="emptyState" style="display:none;">
       <h3>Пока ничего не найдено</h3>
-      <p>Заведите первый баг — он сразу попадёт в статистику и общий список.</p>
+      <p>Заведите первую находку — она сразу попадёт в статистику и общий список.</p>
       <button class="btn" id="emptyAddBtn">+ Новая ошибка</button>
     </div>
   </div>
 
+  <p class="footer-note">Данные хранятся в общем хранилище этого инструмента и видны всем, у кого есть ссылка на него.</p>
 </div>
 
 <!-- Modal -->
@@ -647,18 +654,36 @@ function renderStats(){
   const total = bugs.length;
   const blockers = bugs.filter(b=>b.priority==='Блокер' && b.status!=='Исправлено').length;
   const fixed = bugs.filter(b=>b.status==='Исправлено').length;
+  const inProgress = total - fixed;
   const pct = total ? Math.round(fixed/total*100) : 0;
+
   const byCat = {};
   bugs.forEach(b=> byCat[b.category] = (byCat[b.category]||0)+1);
   const topCat = Object.entries(byCat).sort((a,b)=>b[1]-a[1])[0];
 
+  const byAssignee = {};
+  bugs.forEach(b=>{ if(b.assignee) byAssignee[b.assignee] = (byAssignee[b.assignee]||0)+1; });
+  const topAssignee = Object.entries(byAssignee).sort((a,b)=>b[1]-a[1])[0];
+
+  const weekAgo = Date.now() - 7*24*60*60*1000;
+  const newThisWeek = bugs.filter(b=> b.createdAt && new Date(b.createdAt).getTime() >= weekAgo).length;
+
+  const open = bugs.filter(b=>b.status!=='Исправлено' && b.createdAt);
+  const oldestOpen = open.sort((a,b)=> new Date(a.createdAt) - new Date(b.createdAt))[0];
+  const oldestDays = oldestOpen ? Math.floor((Date.now() - new Date(oldestOpen.createdAt).getTime()) / (24*60*60*1000)) : null;
+
   $('#stats').innerHTML = `
-    <div class="stat"><div class="num mono">${total}</div><div class="label">Всего багов</div></div>
+    <div class="stat"><div class="num mono">${total}</div><div class="label">Всего находок</div></div>
     <div class="stat accent-red"><div class="num mono">${blockers}</div><div class="label">Открытых блокеров</div></div>
+    <div class="stat"><div class="num mono">${inProgress}</div><div class="label">В работе сейчас</div></div>
     <div class="stat accent-green"><div class="num mono">${pct}%</div><div class="label">Исправлено</div></div>
     <div class="stat"><div class="num" style="font-size:16px;">${topCat ? escapeHtml(topCat[0]) : '—'}</div><div class="label">Частая категория ${topCat ? '('+topCat[1]+')' : ''}</div></div>
+    <div class="stat"><div class="num" style="font-size:16px;">${topAssignee ? escapeHtml(topAssignee[0]) : '—'}</div><div class="label">Больше всего на нём ${topAssignee ? '('+topAssignee[1]+')' : ''}</div></div>
+    <div class="stat"><div class="num mono">${newThisWeek}</div><div class="label">Новых за неделю</div></div>
+    <div class="stat ${oldestDays>7?'accent-red':''}"><div class="num mono">${oldestDays!==null ? oldestDays+'д' : '—'}</div><div class="label">Старейший открытый</div></div>
   `;
   renderLangBreakdown();
+  renderPriorityBreakdown();
 }
 
 function renderLangBreakdown(){
@@ -667,6 +692,16 @@ function renderLangBreakdown(){
   const entries = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
   $('#langBreakdown').innerHTML = entries
     .map(([lang,c])=> `<span class="lang-chip">${escapeHtml(lang)} <b>${c}</b></span>`)
+    .join('');
+}
+
+function renderPriorityBreakdown(){
+  const counts = {};
+  bugs.forEach(b=> counts[b.priority||'—'] = (counts[b.priority||'—']||0)+1);
+  const order = ['Блокер','Высокий','Средний','Низкий'];
+  const entries = order.filter(p=>counts[p]).map(p=>[p,counts[p]]);
+  $('#prioBreakdown').innerHTML = entries
+    .map(([p,c])=> `<span class="lang-chip pr-${slug(p)}-chip">${escapeHtml(p)} <b>${c}</b></span>`)
     .join('');
 }
 
@@ -857,7 +892,7 @@ $('#bugForm').addEventListener('submit', async e=>{
 
 $('#deleteBtn').addEventListener('click', async ()=>{
   if(!editingId) return;
-  if(!confirm('Удалить этот баг без возможности восстановления?')) return;
+  if(!confirm('Удалить эту находку без возможности восстановления?')) return;
   const ok = await deleteBugRemote(editingId);
   if(!ok) return;
   bugs = bugs.filter(b=>b.id!==editingId);
